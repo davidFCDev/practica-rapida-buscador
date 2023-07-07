@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Movies } from "./components/Movies";
 import { useMovies } from "./hooks/useMovies";
+import debounce from "just-debounce-it";
 
 function useSearch() {
   const [search, updateSearch] = useState("");
@@ -34,6 +35,13 @@ function App() {
   const { search, updateSearch, error } = useSearch();
   const { movies, getMovies, loading } = useMovies({ search, sort });
 
+  const debouncedGetMovies = useCallback(
+    debounce((search) => {
+      getMovies({ search });
+    }, 300),
+    [getMovies]
+  );
+
   const handleSubmit = (event) => {
     event.preventDefault();
     getMovies({ search });
@@ -62,6 +70,7 @@ function App() {
           <input type="checkbox" onChange={handleSort} checked={sort} />
           <button>Search</button>
         </form>
+        {error && <p style={{ color: "red" }}>{error}</p>}
       </header>
 
       <main>
